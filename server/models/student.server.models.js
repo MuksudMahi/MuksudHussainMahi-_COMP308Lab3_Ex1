@@ -9,7 +9,7 @@ let studentSchema = new Schema(
       type: String,
       match: [/[0-9]{9}/, "Student number should be 9 digits long number"],
       trim: true,
-      sparse: true,
+      unique: true,
       required: "Student number is required",
     },
     firstName: {
@@ -73,5 +73,5 @@ studentSchema.methods.validPassword = function (password) {
 //   missingPasswordError: "wrong/missing password",
 //   usernameField: "studentNumber",
 // };
-studentSchema.plugin(passportLocalMongoose);
+//studentSchema.plugin(passportLocalMongoose);
 mongoose.model("Student", studentSchema);

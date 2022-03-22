@@ -11,9 +11,14 @@ let localSrategy = require("passport-local");
 let bodyParser = require("body-parser");
 let cors = require("cors");
 
-let indexRouter = require("../routes/index.server.routes");
-let courseRouter = require("../routes/course.server.routes");
-let studentRouter = require("../routes/student.server.routes");
+let Schema = require("../graphql/schema/index.js");
+let Resolver = require("../graphql/resolvers/index.js");
+let verifyToken = require("../helpers/jwt.js");
+let expressGraphql = require("express-graphql");
+
+// let indexRouter = require("../routes/index.server.routes");
+// let courseRouter = require("../routes/course.server.routes");
+// let studentRouter = require("../routes/student.server.routes");
 
 //
 
@@ -54,6 +59,17 @@ app.use(
 
 app.use(cookieParser("SomeSecret"));
 
+app.use(verifyToken);
+
+app.use(
+  "/graphql",
+  expressGraphql.graphqlHTTP({
+    schema: Schema,
+    rootValue: Resolver,
+    graphiql: true,
+  })
+);
+
 //User model instance
 //let Student = require("mongoose").model("Student");
 
@@ -73,9 +89,9 @@ require("./passport")(passport);
 //app.use(express.static(path.join(__dirname, "public")));
 
 //routers
-app.use("/", indexRouter);
-app.use("/course", courseRouter);
-app.use("/student", studentRouter);
+// app.use("/", indexRouter);
+// app.use("/course", courseRouter);
+// app.use("/student", studentRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
