@@ -11,7 +11,7 @@ module.exports = graphql.buildSchema(`
         phoneNumber: String
         program: String!
         email:String!
-        courses: [Course]
+        courses: [Courses]
         password: String!
     }
     type Course{
@@ -21,6 +21,10 @@ module.exports = graphql.buildSchema(`
         section: String!
         semester: String
         students: [Student]
+    }
+    type Courses{
+        _id:Course
+        section:String
     }
     input NewStudent{
         studentNumber: String!
@@ -33,19 +37,36 @@ module.exports = graphql.buildSchema(`
         email:String!
         password: String!
     }
+    input NewCourse{
+        courseCode:String!
+        courseName:String!
+        section:String
+        semester:String
+    }
     type LoginReturnType{
         token:String  
         id:ID 
     }
-    type RegisterReturnType{
-        message:String   
+    type MessageReturn{
+        message:String 
+        status:String  
+    }
+    type CourseReturn{
+        _id:[Courses],
+        status:String!
+    }
+    type StudentReturn{
+        students:[Student],
+        status:String!
     }
     type RootMutation{
-        createStudent(newStudent:NewStudent):RegisterReturnType!
+        createStudent(newStudent:NewStudent!):MessageReturn!
         login(studentNumber:String!,password:String!):LoginReturnType!
+        createCourse(newCourse:NewCourse):MessageReturn!
     }
     type RootQuery{
-        students:[Student!]!
+        getStudentCourses(id:String!):CourseReturn
+        getStudentList:StudentReturn
     }
     schema{
         query:RootQuery
