@@ -76,6 +76,7 @@ module.exports = (passport) => {
         passReqToCallback: true, // allows us to pass back the entire request to the callback
       },
       (req, studentNumber, password, done) => {
+        console.log("Here");
         // callback with email and password from our form
 
         // find a user whose email is the same as the forms email
