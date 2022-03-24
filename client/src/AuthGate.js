@@ -32,8 +32,7 @@ export const AuthGate = (props) => {
 
   if (data && authToken) {
     return props.children;
-    //return <Home user={data.student.studentNumber} />;
-  } else {
-    return <Login loading={loading} />;
   }
+
+  return <Login loading={loading} />;
 };
