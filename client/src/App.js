@@ -19,96 +19,47 @@ import EnrolledCourses from "./components/Course/Enrolled";
 import EditSection from "./components/Course/Edit";
 import AllStudents from "./components/Student/All";
 import EnrolledStudents from "./components/Student/Enrolled";
+import { AuthGate } from "./AuthGate";
+import { ApolloProvider } from "@apollo/react-hooks";
+import { useAppApolloClient } from "./config/apolloClient";
 
 function App() {
+  const apolloClient = useAppApolloClient();
+
   return (
-    <div className="wrapper">
+    <ApolloProvider client={apolloClient}>
       <BrowserRouter>
         <Routes>
           <Route
             exact
             path="/"
             element={
-              <Authenticated>
-                <Login />
-              </Authenticated>
-            }
-          ></Route>
-          <Route
-            exact
-            path="/register"
-            element={
-              <Authenticated>
-                <Register />
-              </Authenticated>
-            }
-          ></Route>
-          <Route
-            exact
-            path="/home"
-            element={
-              <RequireAuth>
+              <AuthGate>
                 <Home />
-              </RequireAuth>
-            }
-          ></Route>
-          <Route
-            exact
-            path="/addcourse"
-            element={
-              <RequireAuth>
-                <AddCourse />
-              </RequireAuth>
-            }
-          ></Route>
-          <Route
-            exact
-            path="/allcourses"
-            element={
-              <RequireAuth>
-                <AllCourses />
-              </RequireAuth>
+              </AuthGate>
             }
           ></Route>
           <Route
             exact
             path="/allstudents"
             element={
-              <RequireAuth>
+              <AuthGate>
                 <AllStudents />
-              </RequireAuth>
+              </AuthGate>
             }
           ></Route>
           <Route
             exact
             path="/enrolled"
             element={
-              <RequireAuth>
+              <AuthGate>
                 <EnrolledCourses />
-              </RequireAuth>
-            }
-          ></Route>
-          <Route
-            exact
-            path="/enrolledstudents"
-            element={
-              <RequireAuth>
-                <EnrolledStudents />
-              </RequireAuth>
-            }
-          ></Route>
-          <Route
-            exact
-            path="/edit"
-            element={
-              <RequireAuth>
-                <EditSection />
-              </RequireAuth>
+              </AuthGate>
             }
           ></Route>
         </Routes>
       </BrowserRouter>
-    </div>
+    </ApolloProvider>
   );
 }
 function RequireAuth(props) {

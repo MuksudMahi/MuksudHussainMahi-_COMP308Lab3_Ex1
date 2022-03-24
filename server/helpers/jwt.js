@@ -1,6 +1,6 @@
 let jwt = require("jsonwebtoken");
 let dotenv = require("dotenv");
-let User = require("../models/student.server.models");
+let User = require("mongoose").model("Student");
 
 let keys = require("./keys.js");
 

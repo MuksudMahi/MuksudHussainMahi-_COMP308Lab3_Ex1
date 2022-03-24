@@ -1,52 +1,26 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import {
-  Form,
-  Button,
-  Row,
-  Col,
-  Spinner,
-  ListGroup,
-  Table,
-} from "react-bootstrap";
+import React from "react";
+import { Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 //import "./Auth.css";
 import NavBar from "../Nav/Nav";
 
-import axios from "axios";
+import { gql, useQuery } from "@apollo/client";
 
 toast.configure();
 
 export default function EnrolledStudents(props) {
-  const [data, setData] = useState([]);
-  const [showLoading, setShowLoading] = useState(true);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const GET_ENROLLED_STUDENTS = gql`
+    {
 
-  useEffect(() => {
-    const fetchData = () => {
-      //   const result = await axios(
-      //     "http://localhost:3500/course/students/" + location.state.id
-      //   );
-      axios({
-        method: "GET",
-        withCredentials: true,
-        url: "http://localhost:3500/course/students/" + location.state.id,
-      }).then((res) => {
-        if (res.data.message === "session expired") {
-          toast.error(res.data.message);
-          navigate("/", { replace: true });
-        } else {
-          setData(res.data);
-          setShowLoading(false);
-        }
-      });
-    };
+    }
+  `;
 
-    fetchData();
-  }, []);
+  const { loading, error, data, refetch } = useQuery(GET_ENROLLED_STUDENTS);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
 
   return (
     <div>

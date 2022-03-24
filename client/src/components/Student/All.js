@@ -1,61 +1,39 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  Form,
-  Button,
-  Row,
-  Col,
-  Spinner,
-  ListGroup,
-  Table,
-} from "react-bootstrap";
+import { Spinner, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 //import "./Auth.css";
-import auth from "../Auth/Auth";
 import NavBar from "../Nav/Nav";
-
-import axios from "axios";
+import { gql, useQuery } from "@apollo/client";
 
 toast.configure();
 
 export default function AllStudents(props) {
-  const [data, setData] = useState([]);
-  const [showLoading, setShowLoading] = useState(true);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchData = () => {
-      axios({
-        method: "GET",
-        withCredentials: true,
-        url: "http://localhost:3500/student/list",
-      }).then((res) => {
-        if (res.data.message === "session expired") {
-          auth.logout();
-          toast.error(res.data.message);
-          navigate("/", { replace: true });
-        } else {
-          setData(res.data);
-          setShowLoading(false);
+  const GET_STUDENTS = gql`
+    {
+      getStudentList {
+        students {
+          studentNumber
         }
-      });
-      //const result = await axios("http://localhost:3500/student/list");
-    };
+        students {
+          firstName
+        }
+        students {
+          lastName
+        }
+      }
+    }
+  `;
 
-    fetchData();
-  }, []);
+  const { loading, error, data, refetch } = useQuery(GET_STUDENTS);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
 
   return (
     <div>
       <NavBar />
-      {showLoading && (
-        <Spinner animation="border" role="status">
-          <span className="sr-only">Loading...</span>
-        </Spinner>
-      )}
-
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -65,13 +43,13 @@ export default function AllStudents(props) {
           </tr>
         </thead>
         <tbody>
-          {data.map((item, idx) => (
-            <tr>
+          {data.getStudentList.students.map((item, idx) => (
+            <tr key={idx}>
               <td>{item.studentNumber}</td>
               <td>{item.firstName}</td>
               <td>{item.lastName}</td>
             </tr>
-          ))}{" "}
+          ))}
         </tbody>
       </Table>
     </div>
