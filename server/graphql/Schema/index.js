@@ -63,6 +63,7 @@ module.exports = graphql.buildSchema(`
         createStudent(newStudent:NewStudent!):MessageReturn!
         login(studentNumber:String!,password:String!):LoginReturnType!
         createCourse(newCourse:NewCourse):MessageReturn!
+        deleteCourse(courseId:String!):MessageReturn!
         enrollCourse(studentId: String!, courseId:String!):MessageReturn!
         dropCourse(studentId: String!, courseId:String!):MessageReturn!
         updateCourse(studentId: String!, courseId:String!, section:String!):MessageReturn!
@@ -71,6 +72,8 @@ module.exports = graphql.buildSchema(`
         student(studentId:String!):Student!
         getStudentCourses(id:String!):CourseReturn
         getStudentList:StudentReturn
+        showEnrolledStudents(id:String!):Course
+        showCourseList:[Course]
     }
     schema{
         query:RootQuery

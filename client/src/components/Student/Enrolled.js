@@ -25,7 +25,6 @@ export default function EnrolledStudents(props) {
   return (
     <div>
       <NavBar />
-
       <Table striped bordered hover>
         <thead>
           <tr>

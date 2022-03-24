@@ -50,6 +50,15 @@ function App() {
           ></Route>
           <Route
             exact
+            path="/allcourses"
+            element={
+              <AuthGate>
+                <AllCourses />
+              </AuthGate>
+            }
+          ></Route>
+          <Route
+            exact
             path="/enrolled"
             element={
               <AuthGate>
