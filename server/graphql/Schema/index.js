@@ -63,10 +63,13 @@ module.exports = graphql.buildSchema(`
         createStudent(newStudent:NewStudent!):MessageReturn!
         login(studentNumber:String!,password:String!):LoginReturnType!
         createCourse(newCourse:NewCourse):MessageReturn!
+        deleteCourse(courseId:String!):MessageReturn!
     }
     type RootQuery{
         getStudentCourses(id:String!):CourseReturn
         getStudentList:StudentReturn
+        showEnrolledStudents(id:String!):Course
+        showCourseList:[Course]
     }
     schema{
         query:RootQuery

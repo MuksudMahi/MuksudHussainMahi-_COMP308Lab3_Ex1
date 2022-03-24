@@ -73,6 +73,8 @@ module.exports = {
   },
 
   //Course
+
+  //Mutations
   createCourse: async (args) => {
     try {
       let newCourse = new Course(args.newCourse);
@@ -89,4 +91,44 @@ module.exports = {
       };
     }
   },
+  deleteCourse: async ({courseId}) => {
+    try {
+      await Course.findOne({_id: mongoose.Types.ObjectId(courseId)}) ;
+      await Course.deleteOne({ _id: mongoose.Types.ObjectId(courseId) });
+      return {
+        message: "Course Deleted",
+        status: "Success",
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  
+
+
+  //Query
+  showEnrolledStudents: async ({id})=>{
+    try{
+      console.log(id);
+    let course = await Course.findOne({_id: mongoose.Types.ObjectId(id)})
+      .populate({
+        path: "students",
+        select: "studentNumber firstName lastName",
+      });
+      console.log(course);
+      return course;
+      
+    }catch(error){
+      console.log(error);
+    }
+  },
+  showCourseList: async () => {
+    try {
+      let courses = await Course.find();
+      return courses;
+    } catch (error) {
+      
+    }
+  }
+
 };
