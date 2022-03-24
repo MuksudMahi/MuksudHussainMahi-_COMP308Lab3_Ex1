@@ -9,6 +9,20 @@ let keys = require("../../helpers/keys");
 let varify = require("../../helpers/jwt");
 module.exports = {
   //Student
+  student: async ({ studentId }, req) => {
+    console.log("inside student");
+    if (!req.isAuth) {
+      //throw new Error("Unauthorized");
+      console.log("Unauthorized");
+    }
+    const userInfo = await Student.findById(studentId).exec();
+    console.log(userInfo);
+    if (!userInfo) {
+      //throw new Error("Error");
+      console.log("Error");
+    }
+    return userInfo;
+  },
   createStudent: async (args) => {
     try {
       let studentToSave = new Student(args.newStudent);
@@ -23,6 +37,7 @@ module.exports = {
   },
   login: async ({ studentNumber, password }) => {
     try {
+      console.log("inside login");
       const student = await Student.findOne({ studentNumber });
       if (!student) {
         throw new Error("Invalid Credentials!student");

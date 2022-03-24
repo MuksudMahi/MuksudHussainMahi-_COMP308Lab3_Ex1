@@ -1,40 +1,48 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+//import { Link } from "react-router-dom";
 import { Form, Button } from "react-bootstrap";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Auth.css";
 import auth from "./Auth";
-
 import axios from "axios";
+import { useLoginMutation } from "../../network/loginMutation";
 
 toast.configure();
 
-export default function Login(props) {
+export default function Login({ loading }) {
   const [studentNumber, setStudentNumber] = useState();
   const [password, setPassword] = useState();
-  const navigate = useNavigate();
+  const [loginMutation, loginMutationResults] = useLoginMutation();
+  const disableForm = loginMutationResults.loading || loading;
+  console.log(loading);
 
+  // const handleSubmit = (event) => {
+  //   event.preventDefault();
+  //   if (studentNumber !== undefined && password !== undefined) {
+  //     //console.log("here");
+  //     axios({
+  //       method: "POST",
+  //       data: {
+  //         studentNumber: studentNumber,
+  //         password: password,
+  //       },
+  //       withCredentials: true,
+  //       url: "http://localhost:3500/student/login",
+  //     }).then((res) => {
+  //       if (res.data.studentNumber) {
+  //         auth.login(res.data.studentNumber);
+  //         toast.success("Succefully authenticated");
+  //         navigate("/home", { replace: true });
+  //       } else toast.error(res.data.message);
+  //     });
+  //   }
+  // };
   const handleSubmit = (event) => {
     event.preventDefault();
     if (studentNumber !== undefined && password !== undefined) {
-      //console.log("here");
-      axios({
-        method: "POST",
-        data: {
-          studentNumber: studentNumber,
-          password: password,
-        },
-        withCredentials: true,
-        url: "http://localhost:3500/student/login",
-      }).then((res) => {
-        if (res.data.studentNumber) {
-          auth.login(res.data.studentNumber);
-          toast.success("Succefully authenticated");
-          navigate("/home", { replace: true });
-        } else toast.error(res.data.message);
-      });
+      loginMutation(studentNumber, password);
     }
   };
   return (
@@ -42,6 +50,7 @@ export default function Login(props) {
       handleSubmit={handleSubmit}
       setStudentNumber={setStudentNumber}
       setPassword={setPassword}
+      disableForm={disableForm}
     />
   );
 }
@@ -59,6 +68,7 @@ function FormLayout(props) {
             placeholder="Enter student number"
             onChange={(event) => props.setStudentNumber(event.target.value)}
             required={true}
+            //disabled={disableForm}
           />
         </Form.Group>
 
@@ -69,6 +79,7 @@ function FormLayout(props) {
             placeholder="Password"
             onChange={(event) => props.setPassword(event.target.value)}
             required={true}
+            //disabled={disableForm}
           />
         </Form.Group>
 
@@ -76,7 +87,6 @@ function FormLayout(props) {
           Login
         </Button>
         <br></br>
-        <Link to="/register">Or register here</Link>
       </Form>
     </div>
   );

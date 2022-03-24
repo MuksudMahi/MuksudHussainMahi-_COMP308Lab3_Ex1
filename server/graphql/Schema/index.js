@@ -68,6 +68,7 @@ module.exports = graphql.buildSchema(`
         updateCourse(studentId: String!, courseId:String!, section:String!):MessageReturn!
     }
     type RootQuery{
+        student(studentId:String!):Student!
         getStudentCourses(id:String!):CourseReturn
         getStudentList:StudentReturn
     }
