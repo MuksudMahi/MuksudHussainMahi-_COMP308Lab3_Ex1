@@ -9,125 +9,135 @@ import NavBar from "../Nav/Nav";
 import auth from "../Auth/Auth";
 
 import axios from "axios";
+import { gql, useQuery } from "@apollo/client";
 
 toast.configure();
 
 export default function AllCourses(props) {
-  const [data, setData] = useState([]);
-  const [showLoading, setShowLoading] = useState(true);
-  const [Enrolled, setEnrolled] = useState([]);
+  const GET_ALLCOURSES = gql`
+  {
+    showCourseList
+    {
+      courseCode,
+      courseName
+    }
+  }
+  `;
+  // const [data, setData] = useState([]);
+  // const [showLoading, setShowLoading] = useState(true);
+  // const [Enrolled, setEnrolled] = useState([]);
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchData = () => {
-      axios({
-        method: "GET",
-        withCredentials: true,
-        url: "http://localhost:3500/course",
-      }).then((result) => {
-        if (result.data.message === "session expired") {
-          toast.error(result.data.message);
-          auth.logout();
-          navigate("/", { replace: true });
-        } else {
-          setData(result.data);
-          setShowLoading(false);
-        }
-      });
-      //const result = await axios("http://localhost:3500/course");
-    };
+  const { loading, error, data, refetch } = useQuery(GET_ALLCOURSES);
 
-    const getStudentCourses = () => {
-      let temp = [];
-      axios({
-        method: "GET",
-        withCredentials: true,
-        url: "http://localhost:3500/student/courses",
-      }).then((res) => {
-        if (res.data.message === "session expired") {
-          toast.error(res.data.message);
-          auth.logout();
-          navigate("/", { replace: true });
-        } else {
-          res.data.map((item, idx) => {
-            temp.push(item._id._id);
-          });
-          setEnrolled(temp);
-        }
-      });
-    };
-    fetchData();
-    getStudentCourses();
-  }, [showLoading]);
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
 
-  const enroll = (id) => {
-    axios({
-      method: "POST",
-      data: {
-        courseId: id,
-      },
-      withCredentials: true,
-      url: "http://localhost:3500/student/addcourse",
-    }).then((res) => {
-      if (res.data.message === "session expired") {
-        toast.error(res.data.message);
-        auth.logout();
-        navigate("/", { replace: true });
-      } else setShowLoading(true);
-    });
-  };
+  // useEffect(() => {
+  //   const fetchData = () => {
+  //     axios({
+  //       method: "GET",
+  //       withCredentials: true,
+  //       url: "http://localhost:3500/course",
+  //     }).then((result) => {
+  //       if (result.data.message === "session expired") {
+  //         toast.error(result.data.message);
+  //         auth.logout();
+  //         navigate("/", { replace: true });
+  //       } else {
+  //         setData(result.data);
+  //         setShowLoading(false);
+  //       }
+  //     });
+  //     //const result = await axios("http://localhost:3500/course");
+  //   };
 
-  const drop = (id) => {
-    axios({
-      method: "POST",
-      data: {
-        courseId: id,
-      },
-      withCredentials: true,
-      url: "http://localhost:3500/student/dropcourse",
-    }).then((res) => {
-      if (res.data.message === "session expired") {
-        toast.error(res.data.message);
-        auth.logout();
-        navigate("/", { replace: true });
-      } else setShowLoading(true);
-    });
-  };
+  //   const getStudentCourses = () => {
+  //     let temp = [];
+  //     axios({
+  //       method: "GET",
+  //       withCredentials: true,
+  //       url: "http://localhost:3500/student/courses",
+  //     }).then((res) => {
+  //       if (res.data.message === "session expired") {
+  //         toast.error(res.data.message);
+  //         auth.logout();
+  //         navigate("/", { replace: true });
+  //       } else {
+  //         res.data.map((item, idx) => {
+  //           temp.push(item._id._id);
+  //         });
+  //         setEnrolled(temp);
+  //       }
+  //     });
+  //   };
+  //   fetchData();
+  //   getStudentCourses();
+  // }, [showLoading]);
 
-  const deleteCourse = async (id) => {
-    drop(id);
-    axios({
-      method: "POST",
-      data: {
-        courseId: id,
-      },
-      withCredentials: true,
-      url: "http://localhost:3500/course/delete",
-    }).then((res) => {
-      if (res.data.message === "session expired") {
-        toast.error(res.data.message);
-        auth.logout();
-        navigate("/", { replace: true });
-      } else {
-        toast(res.data.message);
-        setShowLoading(true);
-      }
-    });
-  };
+  // const enroll = (id) => {
+  //   axios({
+  //     method: "POST",
+  //     data: {
+  //       courseId: id,
+  //     },
+  //     withCredentials: true,
+  //     url: "http://localhost:3500/student/addcourse",
+  //   }).then((res) => {
+  //     if (res.data.message === "session expired") {
+  //       toast.error(res.data.message);
+  //       auth.logout();
+  //       navigate("/", { replace: true });
+  //     } else setShowLoading(true);
+  //   });
+  // };
 
-  const enrolledStudents = (id) => {
-    navigate("/enrolledstudents", { state: { id: id } });
-  };
+  // const drop = (id) => {
+  //   axios({
+  //     method: "POST",
+  //     data: {
+  //       courseId: id,
+  //     },
+  //     withCredentials: true,
+  //     url: "http://localhost:3500/student/dropcourse",
+  //   }).then((res) => {
+  //     if (res.data.message === "session expired") {
+  //       toast.error(res.data.message);
+  //       auth.logout();
+  //       navigate("/", { replace: true });
+  //     } else setShowLoading(true);
+  //   });
+  // };
+
+  // const deleteCourse = async (id) => {
+  //   drop(id);
+  //   axios({
+  //     method: "POST",
+  //     data: {
+  //       courseId: id,
+  //     },
+  //     withCredentials: true,
+  //     url: "http://localhost:3500/course/delete",
+  //   }).then((res) => {
+  //     if (res.data.message === "session expired") {
+  //       toast.error(res.data.message);
+  //       auth.logout();
+  //       navigate("/", { replace: true });
+  //     } else {
+  //       toast(res.data.message);
+  //       setShowLoading(true);
+  //     }
+  //   });
+  // };
+
+  // const enrolledStudents = (id) => {
+  //   navigate("/enrolledstudents", { state: { id: id } });
+  // };
 
   return (
     <div>
       <NavBar />
-      {showLoading && (
-        <Spinner animation="border" role="status">
-          <span className="sr-only">Loading...</span>
-        </Spinner>
-      )}
 
       <Table striped bordered hover>
         <thead>
@@ -140,11 +150,11 @@ export default function AllCourses(props) {
           </tr>
         </thead>
         <tbody>
-          {data.map((item, idx) => (
-            <tr>
+          {data.showCourseList.map((item, idx) => (
+            <tr key={idx}>
               <td>{item.courseCode}</td>
               <td>{item.courseName}</td>
-              <td>
+              {/* <td>
                 {!Enrolled.includes(item._id) ? (
                   <Button
                     variant="success"
@@ -160,8 +170,8 @@ export default function AllCourses(props) {
                     Enrolled
                   </Button>
                 )}
-              </td>
-              <td>
+              </td> */}
+              {/* <td>
                 <Button
                   variant="info"
                   size="sm"
@@ -180,18 +190,18 @@ export default function AllCourses(props) {
                 >
                   Delete
                 </Button>
-              </td>
+              </td> */}
             </tr>
-          ))}{" "}
+          ))}
         </tbody>
       </Table>
-      <Button
+      {/* <Button
         variant="primary"
         size="sm"
         onClick={() => navigate("/addcourse")}
       >
         Add Course
-      </Button>
+      </Button> */}
     </div>
   );
 }
