@@ -25,11 +25,7 @@ export default function EnrolledStudents(props) {
   return (
     <div>
       <NavBar />
-      {showLoading && (
-        <Spinner animation="border" role="status">
-          <span className="sr-only">Loading...</span>
-        </Spinner>
-      )}
+      
 
       <Table striped bordered hover>
         <thead>
