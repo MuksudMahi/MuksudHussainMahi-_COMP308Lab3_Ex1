@@ -12,7 +12,9 @@ export default function NavBar() {
     <div>
       <Navbar collapseOnSelect expand="lg" bg="primary" variant="dark">
         <Container>
-          <Navbar.Brand href="/">Course Registration</Navbar.Brand>
+          <Navbar.Brand onClick={() => navigate("/")}>
+            Course Registration
+          </Navbar.Brand>
           <Navbar.Toggle aria-controls="responsive-navbar-nav" />
           <Navbar.Collapse id="responsive-navbar-nav">
             <Nav className="me-auto">
