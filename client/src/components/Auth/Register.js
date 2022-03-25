@@ -5,11 +5,38 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Auth.css";
-import auth from "./Auth";
-
-import axios from "axios";
+import { useMutation } from "@apollo/react-hooks";
+import gql from "graphql-tag";
 
 toast.configure();
+
+export const registerMutationGQL = gql`
+  mutation createStudent(
+    $studentNumber: String!
+    $firstName: String!
+    $lastName: String!
+    $address: String
+    $city: String
+    $phoneNumber: String
+    $program: String!
+    $email: String!
+    $password: String!
+  ) {
+    createStudent(
+      studentNumber: $studentNumber
+      firstName: $firstName
+      lastName: $lastName
+      address: $address
+      city: $city
+      phoneNumber: $phoneNumber
+      program: $program
+      email: $email
+      password: $password
+    ) {
+      message
+    }
+  }
+`;
 
 export default function Register(props) {
   const [studentNumber, setStudentNumber] = useState();
@@ -23,37 +50,27 @@ export default function Register(props) {
   const [program, setProgram] = useState();
   const navigate = useNavigate();
 
+  const [mutation, mutationResults] = useMutation(registerMutationGQL, {
+    onCompleted: (data) => {
+      navigate("/");
+    },
+  });
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (studentNumber !== undefined && password !== undefined) {
-      axios({
-        method: "POST",
-        data: {
-          studentNumber: studentNumber,
-          password: password,
-          firstName: firstName,
-          lastName: lastName,
-          address: address,
-          city: city,
-          phoneNumber: phoneNumber,
-          email: email,
-          program: program,
-        },
-        withCredentials: true,
-        url: "http://localhost:3500/student/register",
-      })
-        .then((response) => {
-          //console.log(response.data);
-          if (response.data.success === "Yes") {
-            toast.success(response.data.message);
-            auth.login(response.data.studentNumber);
-            navigate("/home", { replace: true });
-          } else toast.error(response.data.message);
-        })
-        .catch((error) => {
-          toast.error(error);
-        });
-    }
+    mutation({
+      variables: {
+        studentNumber: studentNumber,
+        firstName: firstName,
+        lastName: lastName,
+        address: address,
+        city: city,
+        phoneNumber: phoneNumber,
+        program: program,
+        email: email,
+        password: password,
+      },
+    });
   };
   return (
     <div className="Register">

@@ -1,139 +1,112 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Spinner, Table } from "react-bootstrap";
+import { Button, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-//import "./Auth.css";
 import NavBar from "../Nav/Nav";
-import auth from "../Auth/Auth";
-
-import axios from "axios";
 import { gql, useQuery } from "@apollo/client";
+import { useMutation } from "@apollo/react-hooks";
+import { useAuthUserToken } from "../../config/auth";
 
 toast.configure();
 
 export default function AllCourses(props) {
+  const [Enrolled, setEnrolled] = useState([]);
   const GET_ALLCOURSES = gql`
-  {
-    showCourseList
     {
-      courseCode,
-      courseName
+      showCourseList {
+        _id
+        courseCode
+        courseName
+      }
     }
-  }
   `;
-  // const [data, setData] = useState([]);
-  // const [showLoading, setShowLoading] = useState(true);
-  // const [Enrolled, setEnrolled] = useState([]);
 
-  // const navigate = useNavigate();
+  const GET_ENROLLED_COURSES = gql`
+    query getStudentCourses($id: String!) {
+      getStudentCourses(id: $id) {
+        courses {
+          _id {
+            _id
+            courseCode
+            courseName
+            section
+          }
+        }
+      }
+    }
+  `;
+
+  const ENROLL_STUDENT = gql`
+    mutation enrollCourse($studentId: String!, $courseId: String!) {
+      enrollCourse(studentId: $studentId, courseId: $courseId) {
+        message
+        status
+      }
+    }
+  `;
+
+  const DELETE_COURSE = gql`
+    mutation deleteCourse($studentId: String!, $courseId: String!) {
+      deleteCourse(studentId: $studentId, courseId: $courseId) {
+        message
+        status
+      }
+    }
+  `;
+
+  let temp = [];
+  const [authUserToken] = useAuthUserToken();
+  const result = useQuery(GET_ENROLLED_COURSES, {
+    variables: { id: authUserToken },
+    onCompleted: (data) => {
+      data.getStudentCourses.courses.map((item, idx) => {
+        temp.push(item._id._id);
+      });
+      setEnrolled(temp);
+    },
+  });
+
+  const navigate = useNavigate();
 
   const { loading, error, data, refetch } = useQuery(GET_ALLCOURSES);
+
+  const [mutation, mutationResults] = useMutation(ENROLL_STUDENT, {
+    onCompleted: (data) => {
+      result.refetch();
+    },
+  });
+
+  const [mutationDelete, deleteMutationResults] = useMutation(DELETE_COURSE, {
+    onCompleted: (data) => {
+      console.log("Here");
+      refetch();
+      result.refetch();
+    },
+  });
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 
-  // useEffect(() => {
-  //   const fetchData = () => {
-  //     axios({
-  //       method: "GET",
-  //       withCredentials: true,
-  //       url: "http://localhost:3500/course",
-  //     }).then((result) => {
-  //       if (result.data.message === "session expired") {
-  //         toast.error(result.data.message);
-  //         auth.logout();
-  //         navigate("/", { replace: true });
-  //       } else {
-  //         setData(result.data);
-  //         setShowLoading(false);
-  //       }
-  //     });
-  //     //const result = await axios("http://localhost:3500/course");
-  //   };
+  const enrollStudent = (event, id) => {
+    mutation({
+      variables: {
+        studentId: authUserToken,
+        courseId: id,
+      },
+    });
+  };
 
-  //   const getStudentCourses = () => {
-  //     let temp = [];
-  //     axios({
-  //       method: "GET",
-  //       withCredentials: true,
-  //       url: "http://localhost:3500/student/courses",
-  //     }).then((res) => {
-  //       if (res.data.message === "session expired") {
-  //         toast.error(res.data.message);
-  //         auth.logout();
-  //         navigate("/", { replace: true });
-  //       } else {
-  //         res.data.map((item, idx) => {
-  //           temp.push(item._id._id);
-  //         });
-  //         setEnrolled(temp);
-  //       }
-  //     });
-  //   };
-  //   fetchData();
-  //   getStudentCourses();
-  // }, [showLoading]);
-
-  // const enroll = (id) => {
-  //   axios({
-  //     method: "POST",
-  //     data: {
-  //       courseId: id,
-  //     },
-  //     withCredentials: true,
-  //     url: "http://localhost:3500/student/addcourse",
-  //   }).then((res) => {
-  //     if (res.data.message === "session expired") {
-  //       toast.error(res.data.message);
-  //       auth.logout();
-  //       navigate("/", { replace: true });
-  //     } else setShowLoading(true);
-  //   });
-  // };
-
-  // const drop = (id) => {
-  //   axios({
-  //     method: "POST",
-  //     data: {
-  //       courseId: id,
-  //     },
-  //     withCredentials: true,
-  //     url: "http://localhost:3500/student/dropcourse",
-  //   }).then((res) => {
-  //     if (res.data.message === "session expired") {
-  //       toast.error(res.data.message);
-  //       auth.logout();
-  //       navigate("/", { replace: true });
-  //     } else setShowLoading(true);
-  //   });
-  // };
-
-  // const deleteCourse = async (id) => {
-  //   drop(id);
-  //   axios({
-  //     method: "POST",
-  //     data: {
-  //       courseId: id,
-  //     },
-  //     withCredentials: true,
-  //     url: "http://localhost:3500/course/delete",
-  //   }).then((res) => {
-  //     if (res.data.message === "session expired") {
-  //       toast.error(res.data.message);
-  //       auth.logout();
-  //       navigate("/", { replace: true });
-  //     } else {
-  //       toast(res.data.message);
-  //       setShowLoading(true);
-  //     }
-  //   });
-  // };
-
-  // const enrolledStudents = (id) => {
-  //   navigate("/enrolledstudents", { state: { id: id } });
-  // };
+  const deleteCourse = (id) => {
+    console.log(id);
+    mutationDelete({
+      variables: {
+        studentId: authUserToken,
+        courseId: id,
+      },
+    });
+  };
 
   return (
     <div>
@@ -154,13 +127,13 @@ export default function AllCourses(props) {
             <tr key={idx}>
               <td>{item.courseCode}</td>
               <td>{item.courseName}</td>
-              {/* <td>
+              <td>
                 {!Enrolled.includes(item._id) ? (
                   <Button
                     variant="success"
                     size="sm"
-                    onClick={() => {
-                      enroll(item._id);
+                    onClick={(event) => {
+                      enrollStudent(event, item._id);
                     }}
                   >
                     Enroll
@@ -170,13 +143,13 @@ export default function AllCourses(props) {
                     Enrolled
                   </Button>
                 )}
-              </td> */}
-              {/* <td>
+              </td>
+              <td>
                 <Button
                   variant="info"
                   size="sm"
                   onClick={() => {
-                    enrolledStudents(item._id);
+                    navigate("/enrolledstudents", { state: { id: item._id } });
                   }}
                 >
                   Enrolled Students
@@ -186,22 +159,17 @@ export default function AllCourses(props) {
                 <Button
                   variant="danger"
                   size="sm"
-                  onClick={() => deleteCourse(item._id)}
+                  onClick={() => {
+                    deleteCourse(item._id);
+                  }}
                 >
                   Delete
                 </Button>
-              </td> */}
+              </td>
             </tr>
           ))}
         </tbody>
       </Table>
-      {/* <Button
-        variant="primary"
-        size="sm"
-        onClick={() => navigate("/addcourse")}
-      >
-        Add Course
-      </Button> */}
     </div>
   );
 }

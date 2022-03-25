@@ -4,11 +4,27 @@ import { Form, Button } from "react-bootstrap";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-//import "./Auth.css";
 import NavBar from "../Nav/Nav";
-import auth from "../Auth/Auth";
+import gql from "graphql-tag";
+import { useMutation } from "@apollo/react-hooks";
 
-import axios from "axios";
+export const addCourseMutationGQL = gql`
+  mutation CreateCourse(
+    $courseCode: String!
+    $courseName: String!
+    $section: String
+    $semester: String
+  ) {
+    createCourse(
+      courseCode: $courseCode
+      courseName: $courseName
+      section: $section
+      semester: $semester
+    ) {
+      status
+    }
+  }
+`;
 
 toast.configure();
 
@@ -20,33 +36,22 @@ export default function AddCourse(props) {
 
   const navigate = useNavigate();
 
+  const [mutation, mutationResults] = useMutation(addCourseMutationGQL, {
+    onCompleted: (data) => {
+      navigate("/allcourses");
+    },
+  });
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    axios({
-      method: "POST",
-      data: {
+    mutation({
+      variables: {
         courseCode: courseCode,
         courseName: courseName,
         section: sections,
         semester: semester,
       },
-      withCredentials: true,
-      url: "http://localhost:3500/course/addcourse",
-    })
-      .then((response) => {
-        console.log(response.data);
-        if (response.data.success === "yes") {
-          toast.success(response.data.message);
-          navigate("/allcourses", { replace: true });
-        } else if (response.data.message === "session expired") {
-          toast.error(response.data.message);
-          auth.logout();
-          navigate("/", { replace: true });
-        } else toast.error(response.data.message);
-      })
-      .catch((error) => {
-        toast.error(error);
-      });
+    });
   };
 
   return (

@@ -10,7 +10,6 @@ let varify = require("../../helpers/jwt");
 module.exports = {
   //Student
   student: async ({ studentId }, req) => {
-    console.log("inside student");
     if (!req.isAuth) {
       //throw new Error("Unauthorized");
       console.log("Unauthorized");
@@ -23,16 +22,36 @@ module.exports = {
     }
     return userInfo;
   },
-  createStudent: async (args) => {
+  createStudent: async ({
+    studentNumber,
+    firstName,
+    lastName,
+    address,
+    city,
+    phoneNumber,
+    program,
+    email,
+    password,
+  }) => {
     try {
-      let studentToSave = new Student(args.newStudent);
+      let studentToSave = new Student({
+        studentNumber: studentNumber,
+        firstName: firstName,
+        lastName: lastName,
+        address: address,
+        city: city,
+        phoneNumber: phoneNumber,
+        program: program,
+        email: email,
+        password: password,
+      });
       studentToSave.password = studentToSave.generateHash(
         studentToSave.password
       );
       await studentToSave.save();
-      return { message: "ok" };
+      return { message: "User Created", status: "Ok" };
     } catch (err) {
-      return { message: err.message };
+      return { message: err.message, status: "Failed" };
     }
   },
   login: async ({ studentNumber, password }) => {
@@ -62,13 +81,16 @@ module.exports = {
   },
   getStudentCourses: async ({ id }) => {
     try {
+      console.log("here");
       var courses = await Student.findOne({
         _id: mongoose.Types.ObjectId(id),
       })
         .select({ courses: 1 })
         .populate({ path: "courses._id", model: "Course" });
       //console.log(courses.courses.map((item) => item._id.courseName));
-      return { _id: courses.courses, status: "Ok" };
+      //return { _id: courses.courses, status: "Ok" };
+      console.log(courses.courses);
+      return courses;
     } catch (error) {
       console.log(error.message);
     }
@@ -159,9 +181,14 @@ module.exports = {
   //Course
 
   //Mutations
-  createCourse: async (args) => {
+  createCourse: async ({ courseCode, courseName, section, semester }) => {
     try {
-      let newCourse = new Course(args.newCourse);
+      let newCourse = new Course({
+        courseCode: courseCode,
+        courseName: courseName,
+        section: section,
+        semester: semester,
+      });
       await newCourse.save();
       return {
         message: "Course Added",
@@ -175,9 +202,18 @@ module.exports = {
       };
     }
   },
-  deleteCourse: async ({courseId}) => {
+  deleteCourse: async ({ studentId, courseId }) => {
     try {
-      await Course.findOne({_id: mongoose.Types.ObjectId(courseId)}) ;
+      console.log(courseId);
+      let currentStudent = await Student.findById(
+        mongoose.Types.ObjectId(studentId)
+      );
+      let courses = currentStudent.courses.filter((value, index, arr) => {
+        return !value._id.equals(mongoose.Types.ObjectId(courseId));
+      });
+      currentStudent.courses = courses;
+      await currentStudent.save();
+      //await Course.findOne({ _id: mongoose.Types.ObjectId(courseId) });
       await Course.deleteOne({ _id: mongoose.Types.ObjectId(courseId) });
       return {
         message: "Course Deleted",
@@ -187,22 +223,20 @@ module.exports = {
       console.log(error);
     }
   },
-  
-
 
   //Query
-  showEnrolledStudents: async ({id})=>{
-    try{
+  showEnrolledStudents: async ({ id }) => {
+    try {
       console.log(id);
-    let course = await Course.findOne({_id: mongoose.Types.ObjectId(id)})
-      .populate({
+      let course = await Course.findOne({
+        _id: mongoose.Types.ObjectId(id),
+      }).populate({
         path: "students",
         select: "studentNumber firstName lastName",
       });
       console.log(course);
       return course;
-      
-    }catch(error){
+    } catch (error) {
       console.log(error);
     }
   },
@@ -210,9 +244,6 @@ module.exports = {
     try {
       let courses = await Course.find();
       return courses;
-    } catch (error) {
-      
-    }
-  }
-
+    } catch (error) {}
+  },
 };

@@ -1,82 +1,73 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  Form,
-  Button,
-  Row,
-  Col,
-  Spinner,
-  ListGroup,
-  Table,
-} from "react-bootstrap";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthUserToken } from "../../config/auth";
+import { useMutation } from "@apollo/react-hooks";
+
+import { Button, Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-//import "./Auth.css";
 import NavBar from "../Nav/Nav";
-import auth from "../Auth/Auth";
-
-import axios from "axios";
+import { gql, useQuery } from "@apollo/client";
 
 toast.configure();
 
 export default function EnrolledCourses(props) {
-  const [data, setData] = useState([]);
-  const [showLoading, setShowLoading] = useState(true);
-  const navigate = useNavigate();
-
   useEffect(() => {
-    const fetchData = () => {
-      //const result = await axios("http://localhost:3500/student/courses");
-      axios({
-        method: "GET",
-        withCredentials: true,
-        url: "http://localhost:3500/student/courses",
-      }).then((res) => {
-        if (res.data.message === "session expired") {
-          toast.error(res.data.message);
-          auth.logout();
-          navigate("/", { replace: true });
-        } else {
-          setData(res.data);
-          setShowLoading(false);
+    refetch();
+  }, []);
+
+  const GET_ENROLLED_COURSES = gql`
+    query getStudentCourses($id: String!) {
+      getStudentCourses(id: $id) {
+        courses {
+          _id {
+            _id
+            courseCode
+            courseName
+            section
+          }
+          section
         }
-      });
-    };
+      }
+    }
+  `;
+  const DROP_COURSE = gql`
+    mutation dropCourse($studentId: String!, $courseId: String!) {
+      dropCourse(studentId: $studentId, courseId: $courseId) {
+        message
+        status
+      }
+    }
+  `;
 
-    fetchData();
-  }, [showLoading]);
+  const [mutation, mutationResults] = useMutation(DROP_COURSE, {
+    onCompleted: (data) => {
+      refetch();
+    },
+  });
 
-  const drop = (id) => {
-    console.log("I am here");
-    axios({
-      method: "POST",
-      data: {
+  const navigate = useNavigate();
+  const [authUserToken] = useAuthUserToken();
+  const { loading, error, data, refetch } = useQuery(GET_ENROLLED_COURSES, {
+    variables: { id: authUserToken },
+  });
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
+  const dropCourse = (id) => {
+    mutation({
+      variables: {
+        studentId: authUserToken,
         courseId: id,
       },
-      withCredentials: true,
-      url: "http://localhost:3500/student/dropcourse",
-    }).then((res) => {
-      console.log(res);
-      if (res.data.message === "session expired") {
-        auth.logout();
-        toast.error(res.data.message);
-        navigate("/", { replace: true });
-      } else {
-        toast.success(res.data.message);
-        setShowLoading(true);
-      }
     });
   };
 
   return (
     <div>
       <NavBar />
-      {showLoading && (
-        <Spinner animation="border" role="status">
-          <span className="sr-only">Loading...</span>
-        </Spinner>
-      )}
 
       <Table striped bordered hover>
         <thead>
@@ -89,8 +80,8 @@ export default function EnrolledCourses(props) {
           </tr>
         </thead>
         <tbody>
-          {data.map((item, idx) => (
-            <tr>
+          {data.getStudentCourses.courses.map((item, idx) => (
+            <tr key={idx}>
               <td>{item._id.courseCode}</td>
               <td>{item._id.courseName}</td>
               <td>{item.section}</td>
@@ -99,7 +90,7 @@ export default function EnrolledCourses(props) {
                   variant="danger"
                   size="sm"
                   onClick={() => {
-                    drop(item._id._id);
+                    dropCourse(item._id._id);
                   }}
                 >
                   Drop
@@ -109,7 +100,7 @@ export default function EnrolledCourses(props) {
                 <Button
                   variant="info"
                   size="sm"
-                  onClick={() =>
+                  onClick={() => {
                     navigate("/edit", {
                       state: {
                         courseId: item._id._id,
@@ -117,14 +108,14 @@ export default function EnrolledCourses(props) {
                         courseName: item._id.courseName,
                         section: item.section,
                       },
-                    })
-                  }
+                    });
+                  }}
                 >
                   Edit
                 </Button>
               </td>
             </tr>
-          ))}{" "}
+          ))}
         </tbody>
       </Table>
     </div>

@@ -60,17 +60,17 @@ module.exports = graphql.buildSchema(`
         status:String!
     }
     type RootMutation{
-        createStudent(newStudent:NewStudent!):MessageReturn!
+        createStudent(studentNumber: String!,firstName: String!,lastName: String!,address: String,city: String,phoneNumber: String,program: String!,email:String!,password: String!):MessageReturn!
         login(studentNumber:String!,password:String!):LoginReturnType!
-        createCourse(newCourse:NewCourse):MessageReturn!
-        deleteCourse(courseId:String!):MessageReturn!
+        createCourse(courseCode: String!,courseName: String!,section: String,semester: String):MessageReturn!
+        deleteCourse(courseId:String!, studentId:String!):MessageReturn!
         enrollCourse(studentId: String!, courseId:String!):MessageReturn!
         dropCourse(studentId: String!, courseId:String!):MessageReturn!
         updateCourse(studentId: String!, courseId:String!, section:String!):MessageReturn!
     }
     type RootQuery{
         student(studentId:String!):Student!
-        getStudentCourses(id:String!):CourseReturn
+        getStudentCourses(id:String!): Student!
         getStudentList:StudentReturn
         showEnrolledStudents(id:String!):Course
         showCourseList:[Course]
