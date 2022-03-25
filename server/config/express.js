@@ -25,8 +25,8 @@ let expressGraphql = require("express-graphql");
 let app = express();
 
 // view engine setup
-app.set("views", path.join(__dirname, "../views"));
-app.set("view engine", "ejs");
+// app.set("views", path.join(__dirname, "../views"));
+// app.set("view engine", "ejs");
 
 //the process.env property allows you to access predefined environment letiables
 //such as NODE_ENV
