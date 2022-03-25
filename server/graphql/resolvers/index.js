@@ -1,3 +1,3 @@
-let userResolvers = require("./userResolvers.js");
+let Resolvers = require("./resolvers.js");
 
-module.exports = { ...userResolvers };
+module.exports = { ...Resolvers };
