@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Spinner, Table } from "react-bootstrap";
+import React from "react";
+import { Table } from "react-bootstrap";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-//import "./Auth.css";
 import NavBar from "../Nav/Nav";
 import { gql, useQuery } from "@apollo/client";
 

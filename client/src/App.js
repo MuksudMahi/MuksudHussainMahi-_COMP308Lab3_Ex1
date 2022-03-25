@@ -1,18 +1,8 @@
 import "./App.css";
-import {
-  BrowserRouter,
-  Route,
-  Routes,
-  Navigate,
-  useLocation,
-} from "react-router-dom";
-import Login from "./components/Auth/Login";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Register from "./components/Auth/Register";
 import Home from "./components/Home/Home";
-import axios from "axios";
-import React, { useState, useEffect } from "react";
-import auth from "./components/Auth/Auth";
-import NavBar from "./components/Nav/Nav";
+import React from "react";
 import AddCourse from "./components/Course/Add";
 import AllCourses from "./components/Course/All";
 import EnrolledCourses from "./components/Course/Enrolled";
@@ -30,6 +20,11 @@ function App() {
     <ApolloProvider client={apolloClient}>
       <BrowserRouter>
         <Routes>
+          <Route
+            exact
+            path="/register"
+            element={<AuthGate myProp={Register}></AuthGate>}
+          ></Route>
           <Route
             exact
             path="/"
@@ -66,29 +61,36 @@ function App() {
               </AuthGate>
             }
           ></Route>
+          <Route
+            exact
+            path="/addcourse"
+            element={
+              <AuthGate>
+                <AddCourse />
+              </AuthGate>
+            }
+          ></Route>
+          <Route
+            exact
+            path="/enrolledstudents"
+            element={
+              <AuthGate>
+                <EnrolledStudents />
+              </AuthGate>
+            }
+          ></Route>
+          <Route
+            exact
+            path="/edit"
+            element={
+              <AuthGate>
+                <EditSection />
+              </AuthGate>
+            }
+          ></Route>
         </Routes>
       </BrowserRouter>
     </ApolloProvider>
   );
 }
-function RequireAuth(props) {
-  let location = useLocation();
-  if (!auth.isAuthenticated())
-    return <Navigate to="/" state={{ from: location }} replace />;
-  return props.children;
-}
-
-function Authenticated(props) {
-  let location = useLocation();
-  if (auth.isAuthenticated())
-    return <Navigate to="/home" state={{ from: location }} replace />;
-  return props.children;
-}
-
-function ShowNav() {
-  if (auth.isAuthenticated) {
-    return <NavBar />;
-  }
-}
-
 export default App;

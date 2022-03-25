@@ -2,7 +2,7 @@ import React from "react";
 import { useAuthToken, useAuthUserToken } from "./config/auth";
 import { gql, useQuery } from "@apollo/client";
 import Login from "./components/Auth/Login";
-import Home from "./components/Home/Home";
+import Register from "./components/Auth/Register";
 
 const userQueryGQL = gql`
   query student($studentId: String!) {
@@ -34,5 +34,6 @@ export const AuthGate = (props) => {
     return props.children;
   }
 
+  if (props.myProp) return <Register loading={loading} />;
   return <Login loading={loading} />;
 };

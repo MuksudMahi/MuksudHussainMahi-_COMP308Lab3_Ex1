@@ -7,7 +7,6 @@ import "./Auth.css";
 import { useLoginMutation } from "../../network/loginMutation";
 import { useNavigate } from "react-router-dom";
 toast.configure();
-
 export default function Login({ loading }) {
   const [studentNumber, setStudentNumber] = useState();
   const [password, setPassword] = useState();
@@ -63,7 +62,9 @@ function FormLayout(props) {
         <Button variant="primary" type="submit">
           Login
         </Button>
-        <Button variant="link">Or register here</Button>
+        <Button variant="link" onClick={(event) => props.navigate("/register")}>
+          Or register here
+        </Button>
       </Form>
     </div>
   );

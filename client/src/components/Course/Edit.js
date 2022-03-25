@@ -1,22 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import {
-  Form,
-  Button,
-  Row,
-  Col,
-  Spinner,
-  ListGroup,
-  Table,
-} from "react-bootstrap";
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Form, Button } from "react-bootstrap";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-//import "./Auth.css";
 import NavBar from "../Nav/Nav";
-import auth from "../Auth/Auth";
-
-import axios from "axios";
+import { useMutation } from "@apollo/react-hooks";
+import { gql } from "@apollo/client";
+import { useAuthUserToken } from "../../config/auth";
 
 toast.configure();
 
@@ -28,25 +19,37 @@ export default function EditSection(props) {
   const [section, setSection] = useState(location.state.section);
   const navigate = useNavigate();
 
+  const UPDATE_COURSE = gql`
+    mutation updateCourse(
+      $studentId: String!
+      $courseId: String!
+      $section: String!
+    ) {
+      updateCourse(
+        studentId: $studentId
+        courseId: $courseId
+        section: $section
+      ) {
+        message
+        status
+      }
+    }
+  `;
+  const [authUserToken] = useAuthUserToken();
+  const [mutation, mutationResults] = useMutation(UPDATE_COURSE, {
+    onCompleted: (data) => {
+      navigate("/enrolled");
+    },
+  });
   const handleSubmit = (event) => {
     event.preventDefault();
-    axios({
-      method: "POST",
-      data: {
+    console.log(section);
+    mutation({
+      variables: {
+        studentId: authUserToken,
         courseId: courseId,
         section: section,
       },
-      withCredentials: true,
-      url: "http://localhost:3500/student/updatecourse",
-    }).then((response) => {
-      if (response.data.message === "session expired") {
-        toast.error(response.data.message);
-        auth.logout();
-        navigate("/", { replace: true });
-      } else {
-        toast(response.data.message);
-        navigate("/enrolled", { replace: true });
-      }
     });
   };
 
