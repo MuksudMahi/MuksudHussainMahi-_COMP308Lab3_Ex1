@@ -12,9 +12,9 @@ import { useAuthUserToken } from "../../config/auth";
 toast.configure();
 
 export default function AllCourses(props) {
-  useEffect(()=>{
+  useEffect(() => {
     refetch();
-  })
+  }, []);
   const [Enrolled, setEnrolled] = useState([]);
   const GET_ALLCOURSES = gql`
     {
